@@ -13,9 +13,11 @@ namespace Refactoring.Tests
 			string text = @"
     public class Sample
     {
-       public void Foo()
-       {
-       }
+		public Sample(){}
+		private const int _someConst = 1;
+		private int _someField = 1;
+		private virtual string SomeProp {get;set;}
+       public void SomeMethod() {}
     }";
 			var tree = CSharpSyntaxTree.ParseText(text);
 			string typeName = "Sample";

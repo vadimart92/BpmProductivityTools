@@ -1,0 +1,52 @@
+﻿{
+	"regions": {
+		"Fields: Public": {
+			"Access": [ "Public" ],
+			"Type": [ "Field" ]
+		}
+	},
+	"sorting": [
+		{
+			"Property": "Type",
+			"Order": [
+				"Enum",
+				"Delegate",
+				"Interfac",
+				"Struct",
+				"Class",
+				"Constant",
+				"Field",
+				"Constructor",
+				"Property",
+				"Event",
+				"Method"
+			]
+		},
+		{
+			"Property": "Access",
+			"Order": [
+				"Private",
+				"Protected",
+				"Internal",
+				"ProtectedInternal",
+				"Public"
+			]
+		},
+		{
+			"Property": "Static",
+			"Order": [ true, false ]
+		},
+		{
+			"Property": "Abstract",
+			"Order": [ true, false ]
+		},
+		{
+			"Property": "Override",
+			"Order": [ true, false ]
+		},
+		{
+			"Property": "New",
+			"Order": [ true, false ]
+		}
+	]
+}

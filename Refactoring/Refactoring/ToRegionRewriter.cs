@@ -3,33 +3,35 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using ServiceStack;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Refactoring {
+
 	public class ToRegionRewriter: CSharpSyntaxRewriter {
 		public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node) {
-			var classDeclaration = (ClassDeclarationSyntax)base.VisitClassDeclaration(node) ;
+			var classDeclaration = (ClassDeclarationSyntax)base.VisitClassDeclaration(node);
+			var members = classDeclaration.ChildNodes().OfType<MemberDeclarationSyntax>()
+				.Select(BaseMemberInfo.Create).ToList();
 			string name = classDeclaration.Identifier.Text;
 			string typeName = "Class";
 			var result = WrapToRegion(classDeclaration, name, typeName);
 			return result;
 		}
 
-		public override SyntaxNode VisitMethodDeclaration(MethodDeclarationSyntax node) {
-			var methodDeclaration = (MethodDeclarationSyntax)base.VisitMethodDeclaration(node);
-			var accessModifiers = new List<SyntaxKind> {
-				SyntaxKind.PublicKeyword ,
-				SyntaxKind.PrivateKeyword,
-				SyntaxKind.ProtectedKeyword,
-				SyntaxKind.InternalKeyword
-			};
-			SyntaxToken token = methodDeclaration.Modifiers.FirstOrDefault(m=> accessModifiers.Any(a=>m.IsKind(a)));
-			string name = token.Text.ToPascalCase();
-			string typeName = "Methods";
-			var result = WrapToRegion(methodDeclaration, name, typeName);
-			return result;
-		}
+		//public override SyntaxNode VisitMethodDeclaration(MethodDeclarationSyntax node) {
+		//	var methodDeclaration = (MethodDeclarationSyntax)base.VisitMethodDeclaration(node);
+		//	var accessModifiers = new List<SyntaxKind> {
+		//		SyntaxKind.PublicKeyword ,
+		//		SyntaxKind.PrivateKeyword,
+		//		SyntaxKind.ProtectedKeyword,
+		//		SyntaxKind.InternalKeyword
+		//	};
+		//	SyntaxToken token = methodDeclaration.Modifiers.FirstOrDefault(m=> accessModifiers.Any(a=>m.IsKind(a)));
+		//	string name = token.Text.ToPascalCase();
+		//	string typeName = "Methods";
+		//	var result = WrapToRegion(methodDeclaration, name, typeName);
+		//	return result;
+		//}
 
 		private static SyntaxNode WrapToRegion(SyntaxNode c, string name, string typeName) {
 			IEnumerable<SyntaxTrivia> leadingTrivia = c.GetLeadingTrivia().ToSyntaxTriviaList();
