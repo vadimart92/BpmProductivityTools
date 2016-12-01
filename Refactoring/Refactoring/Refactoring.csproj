@@ -38,7 +38,7 @@
     <Compile Include="CodeRefactoringProvider.cs" />
     <Compile Include="CodeRewrite\MemberInfo.cs" />
     <Compile Include="CodeRewrite\MemberType.cs" />
-    <Compile Include="CodeRewrite\RegionSyntaxWalker.cs" />
+    <Compile Include="CodeRewrite\RegionParser.cs" />
     <Compile Include="CodeRewrite\SyntaxUtils.cs" />
     <Compile Include="CodeRewrite\TypeInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

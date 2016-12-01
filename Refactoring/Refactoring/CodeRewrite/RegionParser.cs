@@ -4,8 +4,8 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Refactoring.CodeRewrite {
-	public class RegionSyntaxWalker : CSharpSyntaxWalker {
-		private RegionSyntaxWalker():base(SyntaxWalkerDepth.StructuredTrivia) {}
+	public class RegionParser : CSharpSyntaxWalker {
+		private RegionParser():base(SyntaxWalkerDepth.StructuredTrivia) {}
 		private readonly List<Region> _regions = new List<Region>();
 		private readonly Stack<RegionDirectiveTriviaSyntax> _start = new Stack<RegionDirectiveTriviaSyntax>();
 
@@ -23,7 +23,7 @@ namespace Refactoring.CodeRewrite {
 		}
 
 		public static IReadOnlyList<Region> ParceRegions(SyntaxNode node) {
-			var regionParcer = new RegionSyntaxWalker();
+			var regionParcer = new RegionParser();
 			regionParcer.Visit(node);
 			return regionParcer._regions;
 		}

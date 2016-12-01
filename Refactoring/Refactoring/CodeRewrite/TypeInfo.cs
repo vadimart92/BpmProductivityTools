@@ -33,7 +33,7 @@ namespace Refactoring.CodeRewrite {
 
 		private void ParseRegions() {
 			Regions.Clear();
-			Regions.AddRange(RegionSyntaxWalker.ParceRegions(Syntax));
+			Regions.AddRange(RegionParser.ParceRegions(Syntax));
 		}
 
 		public void CheckRegions() {
