@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Rename;
+using Refactoring.CodeRewrite;
 
 namespace Refactoring {
 	public static class RefactoringHelper {
@@ -31,11 +32,11 @@ namespace Refactoring {
 			var optionSet = originalSolution.Workspace.Options;
 			var parent = node.Parent;
 			var root = await document.GetSyntaxRootAsync(cancellationToken);
-			var newRoot = WrapToRegion(root, node);
+			var newRoot = NormalizeRegions(root, node);
 			return document.WithSyntaxRoot(root);
 		}
 
-		public static SyntaxNode WrapToRegion(SyntaxNode syntaxRoot, SyntaxNode currentNode) {
+		public static SyntaxNode NormalizeRegions(SyntaxNode syntaxRoot, SyntaxNode currentNode) {
 			var rewriter = new ToRegionRewriter();
 			var newNode = rewriter.Visit(currentNode);
 			return syntaxRoot.ReplaceNode(currentNode, newNode);

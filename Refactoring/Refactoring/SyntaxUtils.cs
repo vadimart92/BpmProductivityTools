@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Refactoring.CodeRewrite;
 
 namespace Refactoring {
 	public static class SyntaxUtils {

@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Refactoring {
+namespace Refactoring.CodeRewrite {
 	public abstract class MemberInfo<TSyntax> : BaseMemberInfo where TSyntax: MemberDeclarationSyntax {
 		protected MemberInfo(TSyntax syntax): base(syntax) {}
 		protected TSyntax Syntax => (TSyntax) Node;

@@ -33,16 +33,19 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="MemberAccess.cs" />
-    <Compile Include="BaseMemberInfo.cs" />
+    <Compile Include="CodeRewrite\MemberAccess.cs" />
+    <Compile Include="CodeRewrite\BaseMemberInfo.cs" />
     <Compile Include="CodeRefactoringProvider.cs" />
-    <Compile Include="MemberInfo.cs" />
-    <Compile Include="MemberType.cs" />
+    <Compile Include="CodeRewrite\MemberInfo.cs" />
+    <Compile Include="CodeRewrite\MemberType.cs" />
+    <Compile Include="CodeRewrite\RegionSyntaxWalker.cs" />
+    <Compile Include="CodeRewrite\SyntaxUtils.cs" />
+    <Compile Include="CodeRewrite\TypeInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RefactoringHelper.cs" />
-    <Compile Include="Region.cs" />
+    <Compile Include="CodeRewrite\Region.cs" />
     <Compile Include="SyntaxUtils.cs" />
-    <Compile Include="ToRegionRewriter.cs" />
+    <Compile Include="CodeRewrite\ToRegionRewriter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

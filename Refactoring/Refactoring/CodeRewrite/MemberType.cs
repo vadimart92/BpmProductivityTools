@@ -1,11 +1,14 @@
-﻿namespace Refactoring {
+﻿namespace Refactoring.CodeRewrite {
 	public enum MemberType {
+		Undefined,
 		Method,
 		Event,
 		Property,
 		Constructor,
 		Field,
 		Constant,
-		Undefined
+		Class,
+		Interface,
+		Enum
 	}
 }

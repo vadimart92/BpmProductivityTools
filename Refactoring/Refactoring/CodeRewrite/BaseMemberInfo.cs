@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Refactoring {
+namespace Refactoring.CodeRewrite {
 	[DebuggerDisplay("{Type}: {Name}")]
 	public abstract class BaseMemberInfo {
 		protected MemberDeclarationSyntax Node;
