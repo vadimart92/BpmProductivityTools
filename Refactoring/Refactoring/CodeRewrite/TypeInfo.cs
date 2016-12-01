@@ -37,6 +37,7 @@ namespace Refactoring.CodeRewrite {
 		}
 
 		public void CheckRegions() {
+			var membersNotInRegion = Members.Where(m => Regions.Any(r => r.ContainsMember(m))).ToList();
 			throw new System.NotImplementedException();
 		}
 

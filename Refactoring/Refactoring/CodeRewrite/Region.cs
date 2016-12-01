@@ -78,5 +78,9 @@ namespace Refactoring.CodeRewrite {
 		public MemberAccess Access { get; }
 		public RegionDirectiveTriviaSyntax Start { get; }
 		public EndRegionDirectiveTriviaSyntax End { get; }
+
+		public bool ContainsMember(BaseMemberInfo baseMemberInfo) {
+			return baseMemberInfo.
+		}
 	}
 }

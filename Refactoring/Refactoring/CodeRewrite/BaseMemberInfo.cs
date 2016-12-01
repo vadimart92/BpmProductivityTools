@@ -49,6 +49,5 @@ namespace Refactoring.CodeRewrite {
 			return new EmptyMemberInfo(value);
 		}
 
-		
 	}
 }
