@@ -1,11 +1,13 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Refactoring.CodeRewrite {
 	[DebuggerDisplay("{Type}: {Name}")]
-	public abstract class BaseMemberInfo {
+	public abstract class BaseMemberInfo : BaseSyntaxOperationProvider {
 		protected MemberDeclarationSyntax Node;
 
 		protected BaseMemberInfo(MemberDeclarationSyntax node) {
@@ -14,14 +16,18 @@ namespace Refactoring.CodeRewrite {
 		protected abstract SyntaxTokenList Modifiers { get; }
 		protected abstract SyntaxToken Identifier { get; }
 		
-		protected abstract MemberType Type { get; }
-		protected virtual string Name => Identifier.Text;
-		protected virtual MemberAccess Access => Modifiers.GetAccess();
-		protected virtual bool Static => Modifiers.Contains(SyntaxKind.StaticKeyword);
-		protected virtual bool Abstract => Modifiers.Contains(SyntaxKind.AbstractKeyword);
-		protected virtual bool Override => Modifiers.Contains(SyntaxKind.OverrideKeyword);
-		protected virtual bool New => Modifiers.Contains(SyntaxKind.NewKeyword);
-		protected virtual bool Virtual => Modifiers.Contains(SyntaxKind.VirtualKeyword);
+		public abstract MemberType Type { get; }
+		public override string Name => Identifier.Text;
+		public virtual MemberAccess Access => Modifiers.GetAccess();
+		public virtual bool Static => Modifiers.Contains(SyntaxKind.StaticKeyword);
+		public virtual bool Abstract => Modifiers.Contains(SyntaxKind.AbstractKeyword);
+		public virtual bool Override => Modifiers.Contains(SyntaxKind.OverrideKeyword);
+		public virtual bool New => Modifiers.Contains(SyntaxKind.NewKeyword);
+		public virtual bool Virtual => Modifiers.Contains(SyntaxKind.VirtualKeyword);
+
+		public SyntaxNode GetNode() {
+			return Node;
+		}
 		
 		public static BaseMemberInfo Create(MemberDeclarationSyntax value) {
 			var methodDeclarationSyntax = value as MethodDeclarationSyntax;
@@ -49,5 +55,25 @@ namespace Refactoring.CodeRewrite {
 			return new EmptyMemberInfo(value);
 		}
 
+		public bool IsInRegion(Region region) {
+			return region.Span.Start < Node.SpanStart && Node.Span.End < region.Span.End;
+		}
+
+		public bool IsNeedToBeInRegion(Region region) {
+			return region.IsValidMemberRegion && region.Type == Type && region.Access == Access;
+		}
+
+		private MoveInfo _moveInfo;
+		public void Move(Region to, Region from = null) {
+			_moveInfo = new MoveInfo {NodeId = NodeId, FromRegion = from, ToRegion = to};
+		}
+
+		public override List<ChangeApplier> CreateChangeAppliers() {
+			var result = new List<ChangeApplier>();
+			if (_moveInfo != null) {
+				result.Add(_moveInfo);
+			}
+			return result;
+		}
 	}
 }

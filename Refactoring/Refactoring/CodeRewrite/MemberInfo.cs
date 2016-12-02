@@ -2,76 +2,76 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using ServiceStack;
 
 namespace Refactoring.CodeRewrite {
 	public abstract class MemberInfo<TSyntax> : BaseMemberInfo where TSyntax: MemberDeclarationSyntax {
-		protected MemberInfo(TSyntax syntax): base(syntax) {}
+		protected MemberInfo(TSyntax syntax) : base(syntax) {}
 		protected TSyntax Syntax => (TSyntax) Node;
+		protected override string GetNameSuffix(string name) {
+			return $"{Type}_{Access}";
+		}
 	}
 
 	public class EmptyMemberInfo : BaseMemberInfo {
 		public EmptyMemberInfo(MemberDeclarationSyntax node) : base(node) { }
-		protected override string Name => string.Empty;
+		public override string Name => string.Empty;
 		protected override SyntaxToken Identifier => SyntaxFactory.Token(SyntaxTriviaList.Empty, SyntaxKind.WhitespaceTrivia, String.Empty, String.Empty, SyntaxTriviaList.Empty);
-		protected override MemberType Type => MemberType.Undefined;
+		public override MemberType Type => MemberType.Undefined;
 		protected override SyntaxTokenList Modifiers => new SyntaxTokenList();
+		protected override string GetNameSuffix(string name) {
+			return string.Empty;
+		}
 	}
 
-	public class MethodInfo : MemberInfo<MethodDeclarationSyntax> {
-		public MethodInfo(MethodDeclarationSyntax syntax) : base(syntax) {}
-		protected override SyntaxToken Identifier => Syntax.Identifier;
-		protected override MemberType Type => MemberType.Method;
+	public abstract class BaseMethodInfo<TSyntax> : MemberInfo<TSyntax> where TSyntax : BaseMethodDeclarationSyntax {
+		private readonly int _parametersHash;
+		protected BaseMethodInfo(TSyntax syntax) : base(syntax) {
+			_parametersHash = Syntax.ParameterList.NormalizeWhitespace(String.Empty, String.Empty).ToFullString().GetHashCode();
+		}
+		public override MemberType Type => MemberType.Method;
 		protected override SyntaxTokenList Modifiers => Syntax.Modifiers;
-	}
-
-	public class PropertyInfo : MemberInfo<PropertyDeclarationSyntax> {
-		public PropertyInfo(PropertyDeclarationSyntax syntax) : base(syntax) {}
-		protected override SyntaxToken Identifier => Syntax.Identifier;
-		protected override MemberType Type => MemberType.Property;
-		protected override SyntaxTokenList Modifiers => Syntax.Modifiers;
-	}
-	public class ConstructorInfo : MemberInfo<ConstructorDeclarationSyntax> {
-		public ConstructorInfo(ConstructorDeclarationSyntax syntax) : base(syntax) {}
-		protected override SyntaxToken Identifier => Syntax.Identifier;
-		protected override MemberType Type => MemberType.Constructor;
-		protected override SyntaxTokenList Modifiers => Syntax.Modifiers;
+		protected override string GetNameSuffix(string name) {
+			return base.GetNameSuffix(name) + "_" + _parametersHash;
+		}
 	}
 
 	public abstract class BaseFieldInfo<TSyntax> : MemberInfo<TSyntax> where TSyntax : BaseFieldDeclarationSyntax {
 		protected override SyntaxToken Identifier => Syntax.Declaration.Variables.First().Identifier;
-		protected BaseFieldInfo(TSyntax syntax) : base(syntax) {}
+		protected BaseFieldInfo(TSyntax syntax) : base(syntax) { }
 		protected override SyntaxTokenList Modifiers => Syntax.Modifiers;
+	}
+
+	public class PropertyInfo : MemberInfo<PropertyDeclarationSyntax> {
+		public PropertyInfo(PropertyDeclarationSyntax syntax) : base(syntax) { }
+		protected override SyntaxToken Identifier => Syntax.Identifier;
+		public override MemberType Type => MemberType.Property;
+		protected override SyntaxTokenList Modifiers => Syntax.Modifiers;
+	}
+
+	public class MethodInfo : BaseMethodInfo<MethodDeclarationSyntax> {
+		public MethodInfo(MethodDeclarationSyntax syntax) : base(syntax) { }
+		protected override SyntaxToken Identifier => Syntax.Identifier;
+	}
+
+	public class ConstructorInfo : BaseMethodInfo<ConstructorDeclarationSyntax> {
+		public ConstructorInfo(ConstructorDeclarationSyntax syntax) : base(syntax) {}
+		protected override SyntaxToken Identifier => Syntax.Identifier;
 	}
 
 	public class FieldInfo : BaseFieldInfo<FieldDeclarationSyntax> {
 		public FieldInfo(FieldDeclarationSyntax syntax) : base(syntax) {}
-		protected override MemberType Type => MemberType.Field;
+		public override MemberType Type => MemberType.Field;
 	}
 
 	public class ConstantInfo : FieldInfo {
 		public ConstantInfo(FieldDeclarationSyntax syntax) : base(syntax) {}
-		protected override MemberType Type => MemberType.Constant;
+		public override MemberType Type => MemberType.Constant;
 	}
 
 	public class EventInfo : BaseFieldInfo<EventFieldDeclarationSyntax> {
 		public EventInfo(EventFieldDeclarationSyntax syntax) : base(syntax) { }
-		protected override MemberType Type => MemberType.Event;
+		public override MemberType Type => MemberType.Event;
 	}
 
-	/*
-
-Enum
-Delegate
-
-Interface
-Struct
-Class
-
-*Constant
--Field
--Constructor
--Property
-Event
--Method
-	 */
 }

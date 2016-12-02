@@ -6,12 +6,14 @@ namespace Refactoring.CodeRewrite {
 
 	public class ToRegionRewriter: CSharpSyntaxRewriter {
 		public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node) {
-			var classDeclaration = (ClassDeclarationSyntax)base.VisitClassDeclaration(node);
-			var typeInfo = new TypeInfo {
-				Syntax = classDeclaration
-			};
-			typeInfo.CheckRegions();
-			return typeInfo.Syntax;
+			var classDeclaration = (TypeDeclarationSyntax)base.VisitClassDeclaration(node);
+			var typeInfo = new TypeInfo {Syntax = classDeclaration};
+			var changes = typeInfo.CreateChangeAppliers();
+			foreach (var change in changes) {
+				classDeclaration = change.ApplyChanges(classDeclaration, typeInfo);
+				typeInfo = new TypeInfo { Syntax = classDeclaration };
+			}
+			return classDeclaration;
 		}
 	}
 }
