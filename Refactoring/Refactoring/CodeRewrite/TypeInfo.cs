@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Refactoring.CodeRewrite {
@@ -19,10 +20,28 @@ namespace Refactoring.CodeRewrite {
 			}
 		}
 
+		public override TypeDeclarationSyntax ParentType {
+			get { return base.ParentType; }
+			set {
+				base.ParentType = value;
+				foreach (var item in Regions.Cast<BaseSyntaxOperationProvider>().Concat(Members)) {
+					item.ParentType = value;
+				}
+			}
+		}
+
 		private void Analyze() {
 			Name = Syntax.Identifier.Text;
 			ParseRegions();
 			ParceMethods();
+			var nodesToTrack = GetNodesToTrack();
+			_syntax = _syntax.TrackNodes(nodesToTrack);
+		}
+
+		public override IEnumerable<SyntaxNode> GetNodesToTrack() {
+			return Members.Select(m => m.GetNode())
+					.Concat(Regions.SelectMany(r=>r.GetNodesToTrack()))
+					.ToList();
 		}
 
 		private void ParceMethods() {
@@ -42,11 +61,7 @@ namespace Refactoring.CodeRewrite {
 
 		private void CheckRegions() {
 			foreach (var member in Members) {
-				var actualRegion =
-					Regions.Where(r => member.IsInRegion(r))
-						.OrderByDescending(r => r.Type == member.Type && r.Access == member.Access)
-						.ThenByDescending(r => r.Span.Length)
-						.Take(1).FirstOrDefault();
+				var actualRegion = FindActualRegion(member);
 				var destinationRegion = Regions.FirstOrDefault(r => member.IsNeedToBeInRegion(r));
 				if (destinationRegion == null) {
 					destinationRegion = Region.Create(member.Type, member.Access);
@@ -58,7 +73,16 @@ namespace Refactoring.CodeRewrite {
 			}
 		}
 
-		public override List<ChangeApplier> CreateChangeAppliers() {
+		private Region FindActualRegion(BaseMemberInfo member) {
+			var actualRegion =
+				Regions.Where(member.IsInRegion)
+					.OrderByDescending(r => r.Type == member.Type && r.Access == member.Access)
+					.ThenByDescending(r => r.Span.Length)
+					.Take(1).FirstOrDefault();
+			return actualRegion;
+		}
+		
+		public override List<IChangeApplier> CreateChangeAppliers() {
 			CheckRegions();
 			var appliers = Regions.SelectMany(region => region.CreateChangeAppliers()).ToList();
 			var memberAppliers = Members.SelectMany(member => member.CreateChangeAppliers()).ToList();

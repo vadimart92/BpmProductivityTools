@@ -9,9 +9,9 @@ namespace Refactoring.CodeRewrite {
 			var classDeclaration = (TypeDeclarationSyntax)base.VisitClassDeclaration(node);
 			var typeInfo = new TypeInfo {Syntax = classDeclaration};
 			var changes = typeInfo.CreateChangeAppliers();
+			classDeclaration = typeInfo.Syntax;
 			foreach (var change in changes) {
 				classDeclaration = change.ApplyChanges(classDeclaration, typeInfo);
-				typeInfo = new TypeInfo { Syntax = classDeclaration };
 			}
 			return classDeclaration;
 		}

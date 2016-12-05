@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Refactoring.CodeRewrite {
-	public class MoveInfo : ChangeApplier {
+	public class MoveInfo : IChangeApplier {
 		
 		public Region FromRegion {
 			get; set;
@@ -13,14 +14,24 @@ namespace Refactoring.CodeRewrite {
 			get; set;
 		}
 
-		public override TypeDeclarationSyntax ApplyChanges(TypeDeclarationSyntax type, TypeInfo typeInfo) {
-			var method = typeInfo.Members.Find(m => m.NodeId.Equals(NodeId, StringComparison.OrdinalIgnoreCase));
-			var newType = type.RemoveNode(method.GetNode(), SyntaxRemoveOptions.KeepLeadingTrivia);
-			typeInfo = new TypeInfo {Syntax = newType};
-			var toRegion = typeInfo.Regions.Find(r => r.NodeId.Equals(ToRegion.NodeId, StringComparison.OrdinalIgnoreCase));
-			var methodInregion = type.DescendantNodes().First(m => m.Contains(toRegion.Start));
-			newType = newType.InsertNodesAfter(methodInregion, new[] {method.GetNode()});
-			return newType;
+		public BaseMemberInfo Member { get; set; }
+
+		public TypeDeclarationSyntax ApplyChanges(TypeDeclarationSyntax type, TypeInfo typeInfo) {
+			var method = Member.FindSyntaxNode(type);
+			type = type.RemoveNode(method, SyntaxRemoveOptions.KeepLeadingTrivia);
+			typeInfo.ParentType = type;
+			method = method.WithoutTrivia();
+			var toRegionStart = ToRegion.Start;
+			var methodInRegion = type.Members.First(m => ContainsRegion(m, toRegionStart));
+			type = type.InsertNodesAfter(methodInRegion, new[] {method});
+			typeInfo.ParentType = type;
+			return type;
+		}
+
+		private static bool ContainsRegion(SyntaxNode m, RegionDirectiveTriviaSyntax toRegionStart) {
+			var regions = m.GetLeadingTrivia().Where(t=>t.IsKind(SyntaxKind.RegionDirectiveTrivia)).ToList();
+			return regions.Any(t=>t.Span == toRegionStart.Span);
 		}
 	}
+
 }

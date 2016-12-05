@@ -17,11 +17,14 @@ namespace Refactoring.CodeRewrite {
 			TypeName = access;
 		}
 		public override bool IsValidMemberRegion => false;
+
+		public TypeRegion(TypeDeclarationSyntax typeDeclarationSyntax) : base(typeDeclarationSyntax) {
+		}
 	}
 
 	public class Region : BaseSyntaxOperationProvider {
-		protected Region() {
-			
+		protected Region(TypeDeclarationSyntax typeDeclarationSyntax) {
+			ParentType = typeDeclarationSyntax;
 		}
 
 		protected override string GetNameSuffix(string name) {
@@ -34,11 +37,18 @@ namespace Refactoring.CodeRewrite {
 			return counter > 1 ? counter.ToString() : string.Empty;
 		}
 
+		public override IEnumerable<SyntaxNode> GetNodesToTrack() {
+			return new List<SyntaxNode> {_start, _end};
+		}
+
 		private static readonly Regex NameRegex = new Regex("(?<Type>\\w+)(\\s*):(\\s*)(?<Access>\\w+)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 		private bool _isNew;
 		private TypeInfo _typeInfo;
+		private RegionDirectiveTriviaSyntax _start;
+		private EndRegionDirectiveTriviaSyntax _end;
+
 		public static Region Create(RegionDirectiveTriviaSyntax start, EndRegionDirectiveTriviaSyntax end, TypeInfo typeInfo) {
-			Region result = new Region();
+			Region result = new Region(typeInfo.Syntax);
 			var message =
 				start.EndOfDirectiveToken.GetAllTrivia().FirstOrDefault(t => t.IsKind(SyntaxKind.PreprocessingMessageTrivia));
 			if (message != default(SyntaxTrivia)) {
@@ -49,7 +59,7 @@ namespace Refactoring.CodeRewrite {
 					var type = GetTypeByName(typeName);
 					bool isType = type == MemberType.Class || type == MemberType.Interface || type == MemberType.Enum;
 					if (isType) {
-						result = new TypeRegion();
+						result = new TypeRegion(typeInfo.Syntax);
 					}
 					result.Type = type;
 					string access = match.Groups["Access"].Value.Trim();
@@ -62,8 +72,9 @@ namespace Refactoring.CodeRewrite {
 			result._typeInfo = typeInfo;
 			return result;
 		}
+
 		public static Region Create(MemberType type, MemberAccess access) {
-			return new Region {
+			return new Region(null) {
 				Type = type,
 				Access = access,
 				_isNew = true
@@ -130,12 +141,26 @@ namespace Refactoring.CodeRewrite {
 
 		public virtual bool IsValidMemberRegion => Type != MemberType.Undefined && Access != MemberAccess.Undefined;
 
-		public RegionDirectiveTriviaSyntax Start { get; private set;}
-		public EndRegionDirectiveTriviaSyntax End { get; private set; }
-		public TextSpan Span => new TextSpan(Start.SpanStart, End.Span.End);
+		public RegionDirectiveTriviaSyntax Start {
+			get {
+				var node = ParentType.GetCurrentNode(_start);
+				return node == default (RegionDirectiveTriviaSyntax)? _start : node;
+			}
+			private set { _start = value; }
+		}
 
-		public override List<ChangeApplier> CreateChangeAppliers() {
-			var result = new List<ChangeApplier>();
+		public EndRegionDirectiveTriviaSyntax End {
+			get {
+				var node = ParentType.GetCurrentNode(_end);
+				return node == default(EndRegionDirectiveTriviaSyntax) ? _end : node;
+			}
+			private set { _end = value; }
+		}
+
+		public TextSpan Span => new TextSpan(_start.SpanStart, _end.Span.End);
+
+		public override List<IChangeApplier> CreateChangeAppliers() {
+			var result = new List<IChangeApplier>();
 			if (!_isNew) {
 				return result;
 			}

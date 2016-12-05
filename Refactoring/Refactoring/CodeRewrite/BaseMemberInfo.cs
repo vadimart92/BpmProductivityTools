@@ -65,15 +65,19 @@ namespace Refactoring.CodeRewrite {
 
 		private MoveInfo _moveInfo;
 		public void Move(Region to, Region from = null) {
-			_moveInfo = new MoveInfo {NodeId = NodeId, FromRegion = from, ToRegion = to};
+			_moveInfo = new MoveInfo {FromRegion = from, ToRegion = to, Member = this};
 		}
 
-		public override List<ChangeApplier> CreateChangeAppliers() {
-			var result = new List<ChangeApplier>();
+		public override List<IChangeApplier> CreateChangeAppliers() {
+			var result = new List<IChangeApplier>();
 			if (_moveInfo != null) {
 				result.Add(_moveInfo);
 			}
 			return result;
+		}
+
+		public SyntaxNode FindSyntaxNode(TypeDeclarationSyntax type) {
+			return type.GetCurrentNode(Node);
 		}
 	}
 }

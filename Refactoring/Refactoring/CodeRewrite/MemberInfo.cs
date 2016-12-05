@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using ServiceStack;
 
 namespace Refactoring.CodeRewrite {
 	public abstract class MemberInfo<TSyntax> : BaseMemberInfo where TSyntax: MemberDeclarationSyntax {
@@ -10,6 +10,12 @@ namespace Refactoring.CodeRewrite {
 		protected TSyntax Syntax => (TSyntax) Node;
 		protected override string GetNameSuffix(string name) {
 			return $"{Type}_{Access}";
+		}
+		public TSyntax FindTypedNode(TypeDeclarationSyntax type) {
+			return type.GetCurrentNode(Syntax);
+		}
+		public override IEnumerable<SyntaxNode> GetNodesToTrack() {
+			return new[] {Node};
 		}
 	}
 
@@ -21,6 +27,10 @@ namespace Refactoring.CodeRewrite {
 		protected override SyntaxTokenList Modifiers => new SyntaxTokenList();
 		protected override string GetNameSuffix(string name) {
 			return string.Empty;
+		}
+
+		public override IEnumerable<SyntaxNode> GetNodesToTrack() {
+			return new []{ Node };
 		}
 	}
 
