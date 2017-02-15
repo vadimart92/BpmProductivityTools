@@ -39,7 +39,10 @@ namespace Refactoring {
 		public static SyntaxNode NormalizeRegions(SyntaxNode syntaxRoot, SyntaxNode currentNode) {
 			var rewriter = new ToRegionRewriter();
 			var newNode = rewriter.Visit(currentNode);
-			return syntaxRoot.ReplaceNode(currentNode, newNode);
+			var result = syntaxRoot.ReplaceNode(currentNode, newNode);
+			var lineEndingsRewriter = new LineEndingsRewriter();
+			result = lineEndingsRewriter.Visit(result);
+			return result;
 		}
 	}
 }

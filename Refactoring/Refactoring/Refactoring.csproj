@@ -36,12 +36,13 @@
     <Compile Include="CodeRewrite\BaseSyntaxOperationProvider.cs" />
     <Compile Include="CodeRewrite\ChangeApplier.cs" />
     <Compile Include="CodeRewrite\EnumUtils.cs" />
+    <Compile Include="CodeRewrite\LineEndingsRewriter.cs" />
     <Compile Include="CodeRewrite\MemberAccess.cs" />
     <Compile Include="CodeRewrite\BaseMemberInfo.cs" />
     <Compile Include="CodeRefactoringProvider.cs" />
     <Compile Include="CodeRewrite\MemberInfo.cs" />
     <Compile Include="CodeRewrite\MemberType.cs" />
-    <Compile Include="CodeRewrite\MoveInfo.cs" />
+    <Compile Include="CodeRewrite\MoveMemberChangeApplier.cs" />
     <Compile Include="CodeRewrite\RegionParser.cs" />
     <Compile Include="CodeRewrite\SyntaxUtils.cs" />
     <Compile Include="CodeRewrite\TypeInfo.cs" />

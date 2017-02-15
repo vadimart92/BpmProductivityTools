@@ -63,15 +63,15 @@ namespace Refactoring.CodeRewrite {
 			return region.IsValidMemberRegion && region.Type == Type && region.Access == Access;
 		}
 
-		private MoveInfo _moveInfo;
+		private MoveMemberChangeApplier _moveMemberChangeApplier;
 		public void Move(Region to, Region from = null) {
-			_moveInfo = new MoveInfo {FromRegion = from, ToRegion = to, Member = this};
+			_moveMemberChangeApplier = new MoveMemberChangeApplier {FromRegion = from, ToRegion = to, Member = this};
 		}
 
 		public override List<IChangeApplier> CreateChangeAppliers() {
 			var result = new List<IChangeApplier>();
-			if (_moveInfo != null) {
-				result.Add(_moveInfo);
+			if (_moveMemberChangeApplier != null) {
+				result.Add(_moveMemberChangeApplier);
 			}
 			return result;
 		}
